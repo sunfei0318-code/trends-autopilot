@@ -41,8 +41,8 @@ GitHub 正常，跑下面的一键脚本即可全自动完成。
 3. 设置环境变量并运行：
    ```bash
    export GH_TOKEN=ghp_xxxxxxxxxxxx                 # 上面生成的 PAT
-   export WP_APP_USER=xxxxxxxxxxxx 
-   export WP_APP_PASS=xxxxxxxxxxxx       # WP Application Password，去掉空格
+   export WP_APP_USER=sunfei0318
+   export WP_APP_PASS=plJVL8ZnWkEhN6SrG7jIjav2      # WP Application Password，去掉空格
    ./deploy.sh
    ```
 4. 脚本会自动：登录 gh → 创建仓库 `trends-autopilot` → 推送代码 → 配置
@@ -56,7 +56,7 @@ GitHub 正常，跑下面的一键脚本即可全自动完成。
 1. 在 GitHub 新建仓库，把本目录文件推上去（保留 `trends/` 结构；若想放仓库根，
    删掉 workflow 里的 `working-directory: trends` 两行）。
 2. 仓库 → **Settings → Secrets and variables → Actions → New repository secret**，添加：
-   - `WP_APP_USER` —— WordPress 登录名（`xxxxxxxxxxxx `）
+   - `WP_APP_USER` —— WordPress 登录名（`sunfei0318`）
    - `WP_APP_PASS` —— WordPress **Application Password**（去掉空格）
 3. Actions → *Refresh trends page* → **Run workflow** 先跑一次确认，之后交给定时。
 
