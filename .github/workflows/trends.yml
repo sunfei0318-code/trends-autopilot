@@ -1,0 +1,37 @@
+name: Refresh trends page
+
+on:
+  schedule:
+    # every 30 minutes. GitHub's cron can drift a few minutes under load, and it
+    # never fires on the exact minute -- that is fine for a trends feed.
+    - cron: "*/30 * * * *"
+  # allow a manual run: Actions -> Refresh trends page -> Run workflow
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependency
+        run: pip install --quiet requests
+
+      - name: Fetch trends
+        run: python fetch_trends.py
+
+      - name: Publish to WordPress
+        env:
+          WP_APP_USER: ${{ secrets.WP_APP_USER }}
+          WP_APP_PASS: ${{ secrets.WP_APP_PASS }}
+        run: python build_trends.py --push
