@@ -28,11 +28,9 @@ jobs:
         run: pip install --quiet requests
 
       - name: Fetch trends
-        working-directory: trends
         run: python fetch_trends.py
 
       - name: Publish to WordPress
-        working-directory: trends
         env:
           WP_APP_USER: ${{ secrets.WP_APP_USER }}
           WP_APP_PASS: ${{ secrets.WP_APP_PASS }}
