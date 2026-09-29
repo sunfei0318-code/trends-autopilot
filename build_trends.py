@@ -25,18 +25,32 @@ TITLE = "Tech & Startup Trends"
 
 
 def _auth():
-    """Prefer env vars (GitHub Actions secrets); fall back to a local file."""
+    """WordPress 凭据，按优先级取：
+
+    1. 环境变量 WP_APP_USER / WP_APP_PASS —— GitHub Actions 用 secrets 注入的路径
+    2. 本脚本同目录下的 wp_app_password.txt —— 本地手动运行时的便捷方式
+       （第 1 行用户名，第 2 行 Application Password）
+    """
     u = os.environ.get("WP_APP_USER")
     p = os.environ.get("WP_APP_PASS")
     if u and p:
         return (u, p)
-    path = "/root/.codebuddy/artifact/wp_app_password.txt"
-    with open(path, encoding="utf-8") as f:
-        lines = [x.strip() for x in f if x.strip()]
-    return (lines[0], lines[1])
 
+    here = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                        "wp_app_password.txt")
+    if os.path.exists(here):
+        with open(here, encoding="utf-8") as f:
+            lines = [x.strip() for x in f if x.strip() and not x.startswith("#")]
+        if len(lines) >= 2:
+            return (lines[0], lines[1])
 
-AUTH = _auth()
+    raise SystemExit(
+        "未找到 WordPress 凭据。请二选一：\n"
+        "  * GitHub Actions：在仓库 Settings -> Secrets and variables -> Actions\n"
+        "    添加 WP_APP_USER 和 WP_APP_PASS 两个 secret；\n"
+        "  * 本地运行：export WP_APP_USER=... WP_APP_PASS=...，\n"
+        "    或在本脚本同目录放 wp_app_password.txt（第 1 行用户名，第 2 行密码）。"
+    )
 
 CSS = """
 <style>
@@ -174,7 +188,7 @@ def publish(content):
     # does the page already exist?
     r = requests.get(BASE + "/wp-json/wp/v2/pages",
                      params={"slug": SLUG, "_fields": "id,slug,link,title"},
-                     auth=AUTH, timeout=60,
+                     auth=_auth(), timeout=60,
                      headers={"User-Agent": "trends-bot/1.0"})
     r.raise_for_status()
     existing = r.json()
@@ -183,14 +197,14 @@ def publish(content):
         pid = existing[0]["id"]
         print(f"updating existing page id={pid} link={existing[0].get('link')}")
         rr = requests.post(BASE + f"/wp-json/wp/v2/pages/{pid}",
-                           auth=AUTH, timeout=90,
+                           auth=_auth(), timeout=90,
                            headers={"Content-Type": "application/json",
                                     "User-Agent": "trends-bot/1.0"},
                            json={"content": content})
     else:
         print(f"creating new page slug='{SLUG}'")
         rr = requests.post(BASE + "/wp-json/wp/v2/pages",
-                           auth=AUTH, timeout=90,
+                           auth=_auth(), timeout=90,
                            headers={"Content-Type": "application/json",
                                     "User-Agent": "trends-bot/1.0"},
                            json={"title": TITLE, "slug": SLUG,
@@ -208,7 +222,7 @@ def publish(content):
 if __name__ == "__main__":
     content = build()
     print(f"built content: {len(content)} chars")
-    with open("/root/.codebuddy/artifact/trends_page.html", "w", encoding="utf-8") as f:
+    with open("trends_page.html", "w", encoding="utf-8") as f:
         f.write(content)
     print("saved -> trends_page.html")
 
