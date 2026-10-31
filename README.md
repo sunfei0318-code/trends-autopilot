@@ -42,7 +42,7 @@ GitHub 正常，跑下面的一键脚本即可全自动完成。
    ```bash
    export GH_TOKEN=ghp_xxxxxxxxxxxx                 # 上面生成的 PAT
    export WP_APP_USER=sunfei0318
-   export WP_APP_PASS=plJVL8ZnWkEhN6SrG7jIjav2      # WP Application Password，去掉空格
+   export WP_APP_PASS=xxx      # WP Application Password，去掉空格
    ./deploy.sh
    ```
 4. 脚本会自动：登录 gh → 创建仓库 `trends-autopilot` → 推送代码 → 配置
